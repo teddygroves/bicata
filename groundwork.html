@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.361">
+<meta name="generator" content="quarto-1.3.433">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -19,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 /* CSS for citations */
 div.csl-bib-body { }
@@ -77,6 +111,7 @@ div.csl-indent {
   <ul class="collapse">
   <li><a href="#why-we-want-to-attempt-a-bayesian-imodulon-analysis" id="toc-why-we-want-to-attempt-a-bayesian-imodulon-analysis" class="nav-link" data-scroll-target="#why-we-want-to-attempt-a-bayesian-imodulon-analysis">Why we want to attempt a Bayesian Imodulon analysis</a></li>
   <li><a href="#what-we-would-like-to-achieve" id="toc-what-we-would-like-to-achieve" class="nav-link" data-scroll-target="#what-we-would-like-to-achieve">What we would like to achieve</a></li>
+  <li><a href="#measures-of-success" id="toc-measures-of-success" class="nav-link" data-scroll-target="#measures-of-success">Measures of success</a></li>
   <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model">Model</a></li>
   </ul></li>
   <li><a href="#where-we-need-help" id="toc-where-we-need-help" class="nav-link" data-scroll-target="#where-we-need-help">Where we need help</a></li>
@@ -162,6 +197,170 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 <h2 class="anchored" data-anchor-id="what-we-would-like-to-achieve">What we would like to achieve</h2>
 <p>Ultimately we would like to create a sparse Bayesian ICA model that can reproduce the analysis in <span class="citation" data-cites="tanIndependentComponentAnalysis2020">Tan et al. (<a href="#ref-tanIndependentComponentAnalysis2020" role="doc-biblioref">2020</a>)</span> of the precise-db dataset. This analysis inferred 92 Imodulons from RNA sequencing measurements of 4386 genes in 278 conditions. We would then like to use the same approach to analyse RNA sequencing data from organisms with fewer measurements and to augment our model with informative priors based on information about regulons.</p>
 <p>As a proof of concept we would like to generate and then fit a smaller artificial dataset with uninformative but still sparsity-inducing priors, then fit the same model to a subset of the precise-db dataset.</p>
+</section>
+<section id="measures-of-success" class="level2">
+<h2 class="anchored" data-anchor-id="measures-of-success">Measures of success</h2>
+<p>We can consider an ICA successful if it provides <em>robust</em> imodulons. These robustness can be measured in two ways: experimental saturation and internal replicability.</p>
+<p><em>Experimental saturation</em> is achieved when the imodulons remain stable upon adding more experiments. We can simulate this by random ablation of the experimental conditions before performing ICA.</p>
+<p>We should see first that the number of imodulons remains the same and, second, that the number of genes in each imodulon remains more or less the same (parameters in <span class="math inline">\(M\)</span>). Both can be visualized with a sankey plot.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot2, ggsankey, ggalluvial and dplyr must be installed</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggsankey)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We have run ICA for 25 to 39 random conditions on a private dataset and gathered the <span class="math inline">\(M\)</span> matrices on a single dataset.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data has been anonymized since it is part of a private dataset</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/out_sankey_anon.tsv"</span>, <span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># fix the modulon_this column for the last stage</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df[df<span class="sc">$</span>stage <span class="sc">==</span> <span class="st">"39_10"</span>, <span class="st">"modulon_this"</span>] <span class="ot">=</span> df[df<span class="sc">$</span>stage <span class="sc">==</span> <span class="st">"39_10"</span>, <span class="st">"modulon"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><a href="#fig-sankey-gene">Figure&nbsp;1</a> shows that the number of imodulon is not stable across ablation runs (see the jump from 29 to 30). The composition of each imodulon does not seem to be very stable. Additionally, this plot hightlights the high number of genes that are not assigned to any imodulon.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> stage, <span class="at">next_x =</span> <span class="fu">factor</span>(next_stage), <span class="at">node =</span> <span class="fu">factor</span>(modulon_this), <span class="at">next_node =</span> <span class="fu">factor</span>(modulon_next), <span class="at">fill =</span> <span class="fu">factor</span>(modulon_this), <span class="at">label=</span>modulon_this)) <span class="sc">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_alluvial</span>(<span class="at">flow.alpha=</span>.<span class="dv">4</span>, <span class="at">node.alpha=</span>.<span class="dv">7</span>, <span class="at">width =</span> .<span class="dv">25</span>, <span class="at">node.color=</span><span class="st">"gray70"</span>) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_alluvial_text</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">color=</span><span class="st">"gray20"</span>) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>       <span class="fu">theme_alluvial</span>(<span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>       <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>, <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-sankey-gene" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="groundwork_files/figure-html/fig-sankey-gene-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Gene belonging to imodulons across ablation runs.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>There are some artifacts were some of the genes appear to flow into nothing (see imodulon 0). That should not be possible since the all genes get assign to a node (modulon) on every stage (condition run). The problem is because the genes can be part of more than one imodulon and that results in “duplicated” strands of flow (alluvium) disappearing.</p>
+<p>In the same line of “experimentally saturated”, we can check whether an imodulon has stable activity for the different conditions across ablation runs (parameters in <span class="math inline">\(A\)</span>).</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggalluvial)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>From the aforementioned ICA runs, the <span class="math inline">\(A\)</span> matrices were also gathered.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.cond <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/out_sankey_cond_anon.tsv"</span>, <span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df.cond)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  X modulon condition     weight stage next_stage
+1 0       0        S0 -0.8864822 26_10         NA
+2 1       1        S0  1.3514882 26_10         NA
+3 2       2        S0  1.7112368 26_10         NA
+4 3       3        S0  2.3598187 26_10         NA
+5 4       4        S0  5.3243216 26_10         NA
+6 5       5        S0 -0.3278940 26_10         NA</code></pre>
+</div>
+</div>
+<p>Let’s prepare the data a bit:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.cond.abs <span class="ot">&lt;-</span> df.cond</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df.cond.abs<span class="sc">$</span>weight <span class="ot">=</span> <span class="fu">abs</span>(df.cond.abs<span class="sc">$</span>weight)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>df.cond.abs<span class="sc">$</span>modulon_condition <span class="ot">=</span> <span class="fu">paste</span>(df.cond.abs<span class="sc">$</span>modulon, df.cond.abs<span class="sc">$</span>condition, <span class="at">sep=</span><span class="st">"_"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>complete <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">complete</span>(df.cond.abs, modulon_condition, stage, <span class="at">fill=</span><span class="fu">list</span>(<span class="at">weight=</span><span class="dv">0</span>))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>modulon),<span class="st">"modulon"</span>] <span class="ot">=</span> <span class="fu">as.numeric</span>(stringr<span class="sc">::</span><span class="fu">str_split_fixed</span>(complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>modulon), ]<span class="sc">$</span>modulon_condition, <span class="st">"_"</span>, <span class="dv">2</span>)[,<span class="dv">1</span>])</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>condition),<span class="st">"condition"</span>] <span class="ot">=</span> stringr<span class="sc">::</span><span class="fu">str_split_fixed</span>(complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>condition), ]<span class="sc">$</span>modulon_condition, <span class="st">"_"</span>, <span class="dv">2</span>)[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Color based on experimental conditions (“condition” is the biological replicate in the dataframe):</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>complete.exp <span class="ot">&lt;-</span> complete <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">experiment=</span><span class="fu">case_when</span>(stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>) <span class="sc">~</span> stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"local_([0-9]{3})[a-z]?_"</span>, <span class="at">group=</span><span class="dv">1</span>),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                              <span class="sc">!</span>stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>) <span class="sc">~</span> <span class="st">"S"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><a href="#fig-sankey-condition">Figure&nbsp;2</a> shows the same problem as before but now for the conditions. In general, the weights of the imodulons over the conditions are not very stable across runs.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(complete.exp,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> stage, <span class="at">stratum =</span> <span class="fu">factor</span>(condition), <span class="at">alluvium=</span>modulon_condition,<span class="at">y=</span>weight, <span class="at">label=</span>condition)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_stratum</span>(<span class="fu">aes</span>(<span class="at">color=</span><span class="fu">factor</span>(experiment))) <span class="sc">+</span> </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_alluvium</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">factor</span>(modulon))) <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">"stratum"</span>, <span class="at">size=</span><span class="dv">2</span>, <span class="at">color=</span><span class="st">"gray30"</span>) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">16</span>)) <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">#theme(legend.position = NaN) +</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Condition run"</span>) <span class="sc">+</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Condition weight"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-sankey-condition" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="groundwork_files/figure-html/fig-sankey-condition-1.png" class="img-fluid figure-img" width="4800"></p>
+<figcaption class="figure-caption">Figure&nbsp;2: iModulon weights of conditions across ablation runs.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Finally, for the <em>replicability measure</em> we can check whether the conditions display the same imodulon profile across biological replicates for the whole (non-ablated) dataset.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df.cond<span class="fl">.39</span>loc <span class="ot">&lt;-</span> df.cond <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(stage <span class="sc">==</span> <span class="st">"39_10"</span>, stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>)) <span class="sc">%&gt;%</span>  <span class="co"># only the local ones are actual bio replicates</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">experiment=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"local_([0-9]{3})[a-z]?_"</span>, <span class="at">group=</span><span class="dv">1</span>))  <span class="sc">%&gt;%</span> <span class="co"># extract the experiment (OOX)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">biological replicate</span><span class="st">`</span><span class="ot">=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"[A-Z]$"</span>)) <span class="co"># extract the biological replicate (A,B,C)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df.cond<span class="fl">.39</span>loc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   X modulon   condition      weight stage next_stage experiment
+1 28       0 local_031_A  -5.1886962 39_10         NA        031
+2 29       1 local_031_A  -0.8093426 39_10         NA        031
+3 30       2 local_031_A  -8.3916830 39_10         NA        031
+4 31       3 local_031_A   1.3236297 39_10         NA        031
+5 32       4 local_031_A  -3.0924300 39_10         NA        031
+6 33       5 local_031_A -16.3806644 39_10         NA        031
+  biological replicate
+1                    A
+2                    A
+3                    A
+4                    A
+5                    A
+6                    A</code></pre>
+</div>
+</div>
+<p>In this case, in <a href="#fig-repl-profile">Figure&nbsp;3</a> the experimental condition 005 does not show good replicability.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df.cond<span class="fl">.39</span>loc, <span class="fu">aes</span>(<span class="at">x=</span>modulon, <span class="at">color=</span><span class="fu">factor</span>(<span class="st">`</span><span class="at">biological replicate</span><span class="st">`</span>), <span class="at">y=</span>weight)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"~experiment"</span>, <span class="at">scales=</span><span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="fl">22.0</span>)) <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">color=</span><span class="st">'Biological replicate'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-repl-profile" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="groundwork_files/figure-html/fig-repl-profile-1.png" class="img-fluid figure-img" width="2880"></p>
+<figcaption class="figure-caption">Figure&nbsp;3: iModulon condition weights across replicates for the whole dataset.</figcaption>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="model" class="level2">
 <h2 class="anchored" data-anchor-id="model">Model</h2>
