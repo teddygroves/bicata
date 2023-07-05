@@ -216,22 +216,26 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data has been anonymized since it is part of a private dataset</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/out_sankey_anon.tsv"</span>, <span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/out_sankey_anon.tsv"</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># fix the modulon_this column for the last stage</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df[df<span class="sc">$</span>stage <span class="sc">==</span> <span class="st">"39_10"</span>, <span class="st">"modulon_this"</span>] <span class="ot">=</span> df[df<span class="sc">$</span>stage <span class="sc">==</span> <span class="st">"39_10"</span>, <span class="st">"modulon"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df[df<span class="sc">$</span>stage <span class="sc">==</span> <span class="st">"39_10"</span>, <span class="st">"modulon_this"</span>] <span class="ot">&lt;-</span> df[df<span class="sc">$</span>stage <span class="sc">==</span> <span class="st">"39_10"</span>, <span class="st">"modulon"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p><a href="#fig-sankey-gene">Figure&nbsp;1</a> shows that the number of imodulon is not stable across ablation runs (see the jump from 29 to 30). The composition of each imodulon does not seem to be very stable. Additionally, this plot hightlights the high number of genes that are not assigned to any imodulon.</p>
+<p><a href="#fig-sankey-gene">Figure&nbsp;1</a> shows that the number of imodulons is not stable across ablation runs (see the jump from 29 to 30). The composition of each imodulon does not seem to be very stable. Additionally, this plot hightlights the high number of genes that are not assigned to any imodulon.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> stage, <span class="at">next_x =</span> <span class="fu">factor</span>(next_stage), <span class="at">node =</span> <span class="fu">factor</span>(modulon_this), <span class="at">next_node =</span> <span class="fu">factor</span>(modulon_next), <span class="at">fill =</span> <span class="fu">factor</span>(modulon_this), <span class="at">label=</span>modulon_this)) <span class="sc">+</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_alluvial</span>(<span class="at">flow.alpha=</span>.<span class="dv">4</span>, <span class="at">node.alpha=</span>.<span class="dv">7</span>, <span class="at">width =</span> .<span class="dv">25</span>, <span class="at">node.color=</span><span class="st">"gray70"</span>) <span class="sc">+</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_alluvial_text</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">color=</span><span class="st">"gray20"</span>) <span class="sc">+</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>       <span class="fu">theme_alluvial</span>(<span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>       <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>, <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> stage, <span class="at">next_x =</span> <span class="fu">factor</span>(next_stage),</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">node =</span> <span class="fu">factor</span>(modulon_this),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">next_node =</span> <span class="fu">factor</span>(modulon_next),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">fill =</span> <span class="fu">factor</span>(modulon_this), <span class="at">label =</span> modulon_this)) <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_alluvial</span>(<span class="at">flow.alpha =</span> .<span class="dv">4</span>, <span class="at">node.alpha =</span> .<span class="dv">7</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">width =</span> .<span class="dv">25</span>, <span class="at">node.color =</span> <span class="st">"gray70"</span>) <span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">geom_alluvial_text</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"gray20"</span>) <span class="sc">+</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>       <span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>       <span class="fu">theme_alluvial</span>(<span class="at">base_size =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>       <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>       <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>, <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-sankey-gene" class="quarto-figure quarto-figure-center anchored">
@@ -242,7 +246,7 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 </div>
 </div>
 </div>
-<p>There are some artifacts were some of the genes appear to flow into nothing (see imodulon 0). That should not be possible since the all genes get assign to a node (modulon) on every stage (condition run). The problem is because the genes can be part of more than one imodulon and that results in “duplicated” strands of flow (alluvium) disappearing.</p>
+<p>There are some artifacts were some of the genes appear to flow into nothing (see imodulon 0 at the bottom). This should not be possible since all genes get assigned to a node (modulon) on every stage (condition run). The issue is that genes can be part of more than one imodulon and that results in “duplicated” strands of flow (alluvium) disappearing.</p>
 <p>In the same line of “experimentally saturated”, we can check whether an imodulon has stable activity for the different conditions across ablation runs (parameters in <span class="math inline">\(A\)</span>).</p>
 <div class="cell">
 <details>
@@ -255,8 +259,8 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.cond <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/out_sankey_cond_anon.tsv"</span>, <span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df.cond)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_cond <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/out_sankey_cond_anon.tsv"</span>, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df_cond)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  X modulon condition     weight stage next_stage
@@ -272,38 +276,42 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.cond.abs <span class="ot">&lt;-</span> df.cond</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df.cond.abs<span class="sc">$</span>weight <span class="ot">=</span> <span class="fu">abs</span>(df.cond.abs<span class="sc">$</span>weight)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>df.cond.abs<span class="sc">$</span>modulon_condition <span class="ot">=</span> <span class="fu">paste</span>(df.cond.abs<span class="sc">$</span>modulon, df.cond.abs<span class="sc">$</span>condition, <span class="at">sep=</span><span class="st">"_"</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>complete <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">complete</span>(df.cond.abs, modulon_condition, stage, <span class="at">fill=</span><span class="fu">list</span>(<span class="at">weight=</span><span class="dv">0</span>))</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>modulon),<span class="st">"modulon"</span>] <span class="ot">=</span> <span class="fu">as.numeric</span>(stringr<span class="sc">::</span><span class="fu">str_split_fixed</span>(complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>modulon), ]<span class="sc">$</span>modulon_condition, <span class="st">"_"</span>, <span class="dv">2</span>)[,<span class="dv">1</span>])</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>condition),<span class="st">"condition"</span>] <span class="ot">=</span> stringr<span class="sc">::</span><span class="fu">str_split_fixed</span>(complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>condition), ]<span class="sc">$</span>modulon_condition, <span class="st">"_"</span>, <span class="dv">2</span>)[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df_cond_abs <span class="ot">&lt;-</span> df_cond</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df_cond_abs<span class="sc">$</span>weight <span class="ot">&lt;-</span> <span class="fu">abs</span>(df_cond_abs<span class="sc">$</span>weight)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>df_cond_abs<span class="sc">$</span>modulon_condition <span class="ot">&lt;-</span> <span class="fu">paste</span>(df_cond_abs<span class="sc">$</span>modulon,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                                      df_cond_abs<span class="sc">$</span>condition, <span class="at">sep =</span> <span class="st">"_"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>complete <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">complete</span>(df_cond_abs, modulon_condition,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                            stage, <span class="at">fill =</span> <span class="fu">list</span>(<span class="at">weight =</span> <span class="dv">0</span>))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>modulon), <span class="st">"modulon"</span>] <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(stringr<span class="sc">::</span><span class="fu">str_split_fixed</span>(complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>modulon), ]<span class="sc">$</span>modulon_condition, <span class="st">"_"</span>, <span class="dv">2</span>)[, <span class="dv">1</span>])</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>condition), <span class="st">"condition"</span>] <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_split_fixed</span>(complete[<span class="fu">is.na</span>(complete<span class="sc">$</span>condition), ]<span class="sc">$</span>modulon_condition, <span class="st">"_"</span>, <span class="dv">2</span>)[, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Color based on experimental conditions (“condition” is the biological replicate in the dataframe):</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>complete.exp <span class="ot">&lt;-</span> complete <span class="sc">%&gt;%</span> </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">experiment=</span><span class="fu">case_when</span>(stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>) <span class="sc">~</span> stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"local_([0-9]{3})[a-z]?_"</span>, <span class="at">group=</span><span class="dv">1</span>),</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                              <span class="sc">!</span>stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>) <span class="sc">~</span> <span class="st">"S"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>complete_exp <span class="ot">&lt;-</span> complete <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">experiment =</span> <span class="fu">case_when</span>(stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>) <span class="sc">~</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                                stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"local_([0-9]{3})[a-z]?_"</span>, <span class="at">group =</span> <span class="dv">1</span>),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                              <span class="sc">!</span>stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>) <span class="sc">~</span> <span class="st">"S"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><a href="#fig-sankey-condition">Figure&nbsp;2</a> shows the same problem as before but now for the conditions. In general, the weights of the imodulons over the conditions are not very stable across runs.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(complete.exp,</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> stage, <span class="at">stratum =</span> <span class="fu">factor</span>(condition), <span class="at">alluvium=</span>modulon_condition,<span class="at">y=</span>weight, <span class="at">label=</span>condition)) <span class="sc">+</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_stratum</span>(<span class="fu">aes</span>(<span class="at">color=</span><span class="fu">factor</span>(experiment))) <span class="sc">+</span> </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_alluvium</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">factor</span>(modulon))) <span class="sc">+</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">"stratum"</span>, <span class="at">size=</span><span class="dv">2</span>, <span class="at">color=</span><span class="st">"gray30"</span>) <span class="sc">+</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">16</span>)) <span class="sc">+</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">#theme(legend.position = NaN) +</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Condition run"</span>) <span class="sc">+</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Condition weight"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(complete_exp,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> stage, <span class="at">stratum =</span> <span class="fu">factor</span>(condition),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">alluvium =</span> modulon_condition, <span class="at">y =</span> weight, <span class="at">label =</span> condition)) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_stratum</span>(<span class="fu">aes</span>(<span class="at">color =</span> <span class="fu">factor</span>(experiment))) <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_alluvium</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">factor</span>(modulon))) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">"stratum"</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"gray30"</span>) <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">16</span>)) <span class="sc">+</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#theme(legend.position = NaN) +</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Condition run"</span>) <span class="sc">+</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Condition weight"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-sankey-condition" class="quarto-figure quarto-figure-center anchored">
@@ -318,11 +326,11 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df.cond<span class="fl">.39</span>loc <span class="ot">&lt;-</span> df.cond <span class="sc">%&gt;%</span></span>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df_cond_39loc <span class="ot">&lt;-</span> df_cond <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(stage <span class="sc">==</span> <span class="st">"39_10"</span>, stringr<span class="sc">::</span><span class="fu">str_starts</span>(condition, <span class="st">"local"</span>)) <span class="sc">%&gt;%</span>  <span class="co"># only the local ones are actual bio replicates</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">experiment=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"local_([0-9]{3})[a-z]?_"</span>, <span class="at">group=</span><span class="dv">1</span>))  <span class="sc">%&gt;%</span> <span class="co"># extract the experiment (OOX)</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">biological replicate</span><span class="st">`</span><span class="ot">=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"[A-Z]$"</span>)) <span class="co"># extract the biological replicate (A,B,C)</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df.cond<span class="fl">.39</span>loc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">experiment =</span> stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"local_([0-9]{3})[a-z]?_"</span>, <span class="at">group =</span> <span class="dv">1</span>))  <span class="sc">%&gt;%</span> <span class="co"># extract the experiment (OOX)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">biological replicate</span><span class="st">`</span> <span class="ot">=</span> stringr<span class="sc">::</span><span class="fu">str_extract</span>(condition, <span class="st">"[A-Z]$"</span>)) <span class="co"># extract the biological replicate (A,B,C)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df_cond_39loc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   X modulon   condition      weight stage next_stage experiment
@@ -345,12 +353,13 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df.cond<span class="fl">.39</span>loc, <span class="fu">aes</span>(<span class="at">x=</span>modulon, <span class="at">color=</span><span class="fu">factor</span>(<span class="st">`</span><span class="at">biological replicate</span><span class="st">`</span>), <span class="at">y=</span>weight)) <span class="sc">+</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"~experiment"</span>, <span class="at">scales=</span><span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="fl">22.0</span>)) <span class="sc">+</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">color=</span><span class="st">'Biological replicate'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_cond_39loc, <span class="fu">aes</span>(<span class="at">x =</span> modulon, <span class="at">color =</span> <span class="fu">factor</span>(<span class="st">`</span><span class="at">biological replicate</span><span class="st">`</span>),</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">y =</span> weight)) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="st">"~experiment"</span>, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fl">22.0</span>)) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">"Biological replicate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-repl-profile" class="quarto-figure quarto-figure-center anchored">
