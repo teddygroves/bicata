@@ -1,12 +1,12 @@
 ---
 title: Can sparse Bayesian independent component analysis describe gene regulation?
-jupyter: python3
 bibliography: bibliography.bib
 reference-location: margin
 format:
   html:
     standalone: true
     toc: true
+    code-fold: true
   docx: default
 ---
 
@@ -204,6 +204,146 @@ information about regulons.
 As a proof of concept we would like to generate and then fit a smaller
 artificial dataset with uninformative but still sparsity-inducing priors, then
 fit the same model to a subset of the precise-db dataset.
+
+## Measures of success
+
+We can consider an ICA successful if it provides _robust_ imodulons. These
+robustness can be measured in two ways: experimental saturation and internal replicability.
+
+_Experimental saturation_ is achieved when the imodulons remain stable upon
+adding more experiments. We can simulate this by random ablation of the
+experimental conditions before performing ICA. 
+
+We should see first that the number of imodulons remains the same and, second,
+that the number of genes in each imodulon remains more or less the same (parameters in $M$). Both
+can be visualized with a sankey plot.
+
+```{r}
+#| warning: false
+# ggplot2, ggsankey, ggalluvial and dplyr must be installed
+library(ggplot2)
+library(ggsankey)
+```
+
+We have run ICA for 25 to 39 random conditions on a private dataset
+and gathered the $M$ matrices on a single dataset.
+
+```{r}
+# data has been anonymized since it is part of a private dataset
+df <- read.csv("data/out_sankey_anon.tsv", sep = "\t")
+# fix the modulon_this column for the last stage
+df[df$stage == "39_10", "modulon_this"] <- df[df$stage == "39_10", "modulon"]
+```
+
+@fig-sankey-gene shows that the number of imodulons is not stable across
+ablation runs (see the jump from 29 to 30). The composition of each imodulon
+does not seem to be very stable. Additionally, this plot hightlights the high
+number of genes that are not assigned to any imodulon. 
+
+```{r}
+#| label: fig-sankey-gene
+#| fig-cap: "Gene belonging to imodulons across ablation runs."
+ggplot(df, aes(x = stage, next_x = factor(next_stage),
+                node = factor(modulon_this),
+                next_node = factor(modulon_next),
+                fill = factor(modulon_this), label = modulon_this)) +
+       geom_alluvial(flow.alpha = .4, node.alpha = .7,
+          width = .25, node.color = "gray70") +
+       geom_alluvial_text(size = 2, color = "gray20") +
+       scale_fill_viridis_d() +
+       theme_alluvial(base_size = 16) +
+       labs(x = NULL) +
+       theme(legend.position = "none", axis.text.x = element_text(angle = 90))
+```
+
+There are some artifacts were some of the genes appear to flow into nothing (see imodulon 0 at the bottom).
+This should not be possible since all genes get assigned to a node (modulon) on
+every stage (condition run). The issue is that genes can be part of more
+than one imodulon and that results in "duplicated" strands of flow (alluvium) disappearing.
+
+In the same line of "experimentally saturated", we can check whether an imodulon
+has stable activity for the different conditions across ablation runs (parameters in $A$).
+
+```{r}
+#| warning: false
+library(ggalluvial)
+library(dplyr)
+```
+
+From the aforementioned ICA runs, the $A$ matrices were also gathered.
+
+```{r}
+df_cond <- read.csv("data/out_sankey_cond_anon.tsv", sep = "\t")
+head(df_cond)
+```
+
+Let's prepare the data a bit:
+
+```{r}
+df_cond_abs <- df_cond
+df_cond_abs$weight <- abs(df_cond_abs$weight)
+df_cond_abs$modulon_condition <- paste(df_cond_abs$modulon,
+                                      df_cond_abs$condition, sep = "_")
+complete <- tidyr::complete(df_cond_abs, modulon_condition,
+                            stage, fill = list(weight = 0))
+complete[is.na(complete$modulon), "modulon"] <- as.numeric(stringr::str_split_fixed(complete[is.na(complete$modulon), ]$modulon_condition, "_", 2)[, 1])
+complete[is.na(complete$condition), "condition"] <- stringr::str_split_fixed(complete[is.na(complete$condition), ]$modulon_condition, "_", 2)[, 2]
+```
+
+Color based on experimental conditions ("condition" is the biological replicate in the dataframe):
+
+```{r}
+complete_exp <- complete %>%
+  mutate(experiment = case_when(stringr::str_starts(condition, "local") ~
+                                stringr::str_extract(condition, "local_([0-9]{3})[a-z]?_", group = 1),
+                              !stringr::str_starts(condition, "local") ~ "S"))
+```
+
+@fig-sankey-condition shows the same problem as before but now for the conditions. In general,
+the weights of the imodulons over the conditions are not very stable across runs.
+
+```{r, fig.width=16, fig.height=16, dpi=300}
+#| label: fig-sankey-condition
+#| fig-cap: "iModulon weights of conditions across ablation runs."
+ggplot(complete_exp,
+    aes(x = stage, stratum = factor(condition),
+        alluvium = modulon_condition, y = weight, label = condition)) +
+  geom_stratum(aes(color = factor(experiment))) +
+  geom_alluvium(aes(fill = factor(modulon))) +
+  geom_text(stat = "stratum", size = 2, color = "gray30") +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(text = element_text(size = 16)) +
+  #theme(legend.position = NaN) +
+  xlab("Condition run") +
+  ylab("Condition weight")
+```
+
+Finally, for the _replicability measure_ we can check whether the conditions
+display the same imodulon profile across biological replicates for the whole (non-ablated) dataset.
+
+```{r}
+df_cond_39loc <- df_cond %>%
+  filter(stage == "39_10", stringr::str_starts(condition, "local")) %>%  # only the local ones are actual bio replicates
+  mutate(experiment = stringr::str_extract(condition, "local_([0-9]{3})[a-z]?_", group = 1))  %>% # extract the experiment (OOX)
+  mutate(`biological replicate` = stringr::str_extract(condition, "[A-Z]$")) # extract the biological replicate (A,B,C)
+head(df_cond_39loc)
+```
+
+In this case, in @fig-repl-profile the experimental condition 005 does not show good replicability.
+
+```{r, fig.width=30}
+#| label: fig-repl-profile
+#| fig-cap: "iModulon condition weights across replicates for the whole dataset."
+ggplot(df_cond_39loc, aes(x = modulon, color = factor(`biological replicate`),
+                          y = weight)) +
+  geom_line() +
+  facet_wrap("~experiment", scales = "free") +
+  theme_minimal() +
+  theme(text = element_text(size = 22.0)) +
+  labs(color = "Biological replicate")
+```
+
 
 ## Model
 
