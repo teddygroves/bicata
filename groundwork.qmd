@@ -548,11 +548,17 @@ However, altough faster to sample, the chains are still hitting the max tree
 depth. In the case of orthogonality, the $M$ matrix is not identifiable since
 there is a rotational invariance in the polar expansion. This is a problem for
 reporting such modulons. Another issue that becomes evident when looking at
-@fig-or-ica-90 is that the positive-constraint on $M$, although better for
-inference as aforementioned, makes the modulons interpretation less
+@fig-or-ica-90 is that the positive-constraint on $M$ makes the modulons interpretation less
 straightforward in a biological sense, where we expect that a regulatory mode
 may increase the expression of some genes and decrease the expression of some
 other genes.
+
+As aforementioned, @robertsBayesianIndependentComponent2005 showed the benefit
+of a positive constraint for Bayesian ICA with their mixture of gaussians
+model. However, they propposed the constrain for $A$ --- leaving $M$
+unconstrained ---, the opposite of what we are doing. Would it be sound to
+remove the squared term of $\lambda$ in the definition of $\tilde{\lambda}$
+(@eq-mixing-model) to support $M \in \mathbb{R}$?
 
 # Where we need help
 

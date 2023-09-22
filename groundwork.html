@@ -544,7 +544,7 @@ X^p_{m} &amp;= \frac{1}{\sqrt{\lambda(X)_m}}
 <span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;ggplot: (8738791744220)&gt;</code></pre>
+<pre><code>&lt;ggplot: (8737829084124)&gt;</code></pre>
 </div>
 <div class="cell-output-display">
 <div id="fig-or-ica-90" class="quarto-figure quarto-figure-center anchored">
@@ -555,7 +555,8 @@ X^p_{m} &amp;= \frac{1}{\sqrt{\lambda(X)_m}}
 </div>
 </div>
 </div>
-<p>However, altough faster to sample, the chains are still hitting the max tree depth. In the case of orthogonality, the <span class="math inline">\(M\)</span> matrix is not identifiable since there is a rotational invariance in the polar expansion. This is a problem for reporting such modulons. Another issue that becomes evident when looking at <a href="#fig-or-ica-90">Figure&nbsp;5</a> is that the positive-constraint on <span class="math inline">\(M\)</span>, although better for inference as aforementioned, makes the modulons interpretation less straightforward in a biological sense, where we expect that a regulatory mode may increase the expression of some genes and decrease the expression of some other genes.</p>
+<p>However, altough faster to sample, the chains are still hitting the max tree depth. In the case of orthogonality, the <span class="math inline">\(M\)</span> matrix is not identifiable since there is a rotational invariance in the polar expansion. This is a problem for reporting such modulons. Another issue that becomes evident when looking at <a href="#fig-or-ica-90">Figure&nbsp;5</a> is that the positive-constraint on <span class="math inline">\(M\)</span> makes the modulons interpretation less straightforward in a biological sense, where we expect that a regulatory mode may increase the expression of some genes and decrease the expression of some other genes.</p>
+<p>As aforementioned, <span class="citation" data-cites="robertsBayesianIndependentComponent2005">Roberts and Choudrey (<a href="#ref-robertsBayesianIndependentComponent2005" role="doc-biblioref">2005</a>)</span> showed the benefit of a positive constraint for Bayesian ICA with their mixture of gaussians model. However, they propposed the constrain for <span class="math inline">\(A\)</span> — leaving <span class="math inline">\(M\)</span> unconstrained —, the opposite of what we are doing. Would it be sound to remove the squared term of <span class="math inline">\(\lambda\)</span> in the definition of <span class="math inline">\(\tilde{\lambda}\)</span> (<a href="#eq-mixing-model">Equation&nbsp;6</a>) to support <span class="math inline">\(M \in \mathbb{R}\)</span>?</p>
 </section>
 </section>
 <section id="where-we-need-help" class="level1">
