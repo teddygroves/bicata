@@ -397,6 +397,169 @@ sign consistency, so that a positive relative change in an Imodulon's strength
 in a certain condition will always correspond to up-regulation of genes
 affected by that Imodulon.
 
+## First approach
+
+We merely expressed @eq-mixing-model in stan this with two matrices $M$ and $A$
+instead of one (mimicking the ICA representation) that, when multiplied, give
+rise to $\hat y$.
+
+This worked for simulated data to some extent. For real data, using the 
+[precise-db](https://github.com/SBRG/precise-db), we faced the following issues:
+
+1. The max tree depth had to be set to 1 to get any sampling. This is a problem
+   since that the MCMC chains take too long to sample to do any real inference.
+2. The output is too big. In the end we end with a 30GB file per chain (given the huge amount of columns in the output).
+   This is very difficult to handle.
+
+The results retain some sparsity. These are some of the traces of some arbitrarily
+picked parameters of $M$:
+
+```{r}
+library(tidyr)
+library(ggplot2)
+df <- read.csv("data/lambda4.1start.csv")
+```
+
+```{r}
+df %>%
+  pivot_longer(lambda_tilde_mode.4.1:lambda_tilde_mode.4.19, names_to = "params", values_to = "value") %>%
+  ggplot(aes(x = value, fill = params)) +
+  geom_density(alpha=0.3, color="gray") +
+  theme_minimal() +
+  theme(text = element_text(size = 18.0), legend.position = c(.9, .9))
+```
+
+The same for variational inference (took less than an hour):
+
+```{r}
+df <- read.csv("data/lambda4.1_variational.csv")
+```
+
+```{r}
+df %>%
+  pivot_longer(lambda_tilde_mode.4.1:lambda_tilde_mode.4.19, names_to = "params", values_to = "value") %>%
+  ggplot(aes(x = value, fill = params)) +
+  geom_density(alpha=0.3, color="gray") +
+  theme_minimal() +
+  theme(text = element_text(size = 18.0), legend.position = c(.9, .9)) +
+  scale_x_continuous(trans='log10')
+```
+
+Using partial pooling with shared parameters over the $A$ matrix helped to achieve a better sampling, but still hitting the max tree depth set at 10 at every draw.
+
+## Orthogonality
+
+From the previous ananlysis, we can see that $M$ and $A$ matrices should be further constrained. The charasteristic constrain of ICA is the orthogonality; such that result is that of _Independent Components_.
+
+@jauchMonteCarloSimulation2019 proposes a polar expansion (@eq-polar) to achieve this. The authors proposed a PCA generative model using this expansion that we can adapt for our needs in @eq-or-pca.
+
+$$
+\begin{align}
+\lambda(X) &= \texttt{eigenvalues}(X X^T) \\
+X^p_{m} &= \frac{1}{\sqrt{\lambda(X)_m}}
+\end{align}
+$${#eq-polar}
+
+$$
+\begin{align}
+  M_{m,g} &\sim N(0, \sigma) \\
+  M^\ast &= M \xi(M) diag(M^p) \xi(M)  \\
+  A_{m,g} &\sim N(0, \sigma) \\
+  A^\ast &= A \xi(A) diag(A^p) \xi(A)  \\
+  \nu &\sim \text{inverse gamma} \\
+  D &\sim N(0, \tau) \\
+  y &\sim N(M^\ast diag(D) A^\ast, \nu)
+\end{align}
+$${#eq-or-pca}
+
+where $\xi$ is defined as @eq-xi. This of course did not produce sparse results (@fig-or-pca).
+
+$$
+\xi(X) = \texttt{eigenvectors}(X X^T)	
+$${#eq-xi}
+
+![Three first latent modulon vectors of $M$ for each gene across _Escherichia coli_ genome yielded by orthogonal PCA](data/or_pca.png){#fig-or-pca}
+
+We can reintroduce the regularized horseshoe, this time only for the M priors
+after the orthogonality ($M_p$) and changing the prior of $M$ to a t-student as in @eq-source-model.
+The 90 inferred modulons (chosen as the number identified by classical ICA) for
+_Escherichia coli_ are shown in @fig-or-ica-90, where sparsity can be seen for
+the different latent modulons.
+
+```{python}
+#| warning: false
+#| eval: false
+import arviz as az
+import numpy as np
+import pandas as pd
+
+# not included in the repo since it is 4 GB
+idata = az.from_cmdstan(["../spbica/res/sparse_orthogonal_nov-20230915233645_1.csv"])
+
+all_us = []
+dfs = []
+for i in range(90):
+    u = idata.posterior.U_tilde.sel({"chain": 0, "U_tilde_dim_1": i}).to_pandas()
+    u["modulon"] = i
+    dfs.append(u)
+    if i % 10 == 0:
+        all_us.append(
+            pd.melt(pd.concat(dfs), id_vars="modulon", var_name="gene")
+            .groupby(["modulon", "gene"])
+            .agg(
+                down=pd.NamedAgg("value", lambda x: np.percentile(x, 25)),
+                up=pd.NamedAgg("value", lambda x: np.percentile(x, 95)),
+                median=pd.NamedAgg("value", lambda x: np.percentile(x, 50)),
+                uran=pd.NamedAgg(
+                    "value", lambda x: np.percentile(x, 95) - np.percentile(x, 25)
+                ),
+            )
+            .reset_index()
+        )
+        del dfs
+        dfs = []
+all_us = pd.concat(all_us)
+all_us.to_csv("data/all_us_or.tsv", index=False, sep="\t")
+```
+
+```{python}
+#| label: fig-or-ica-90
+#| fig-cap: Orthogonal, sparse modulon vectors across _Escherichia coli_ genome
+#| warning: false
+import pandas as pd
+import plotnine as p9
+
+all_us: pd.DataFrame = pd.read_csv("data/all_us_or.tsv", sep="\t")
+
+(
+    p9.ggplot(
+        all_us.reset_index(),
+        # it would be better to use tau as the color to indicate membership
+        p9.aes(ymin="down", ymax="up", y="median", x="gene", color="uran"),
+    )
+    + p9.geom_errorbar()
+    + p9.geom_point()
+    + p9.facet_wrap("~modulon", scales="free_y", dir="v", ncol=3)
+    + p9.theme(figure_size=(20, 40))
+)
+```
+
+However, altough faster to sample, the chains are still hitting the max tree
+depth. In the case of orthogonality, the $M$ matrix is not identifiable since
+there is a rotational invariance in the polar expansion. This is a problem for
+reporting such modulons. Another issue that becomes evident when looking at
+@fig-or-ica-90 is that the positive-constraint on $M$ makes the modulons interpretation less
+straightforward in a biological sense, where we expect that a regulatory mode
+may increase the expression of some genes and decrease the expression of some
+other genes.
+
+As aforementioned, @robertsBayesianIndependentComponent2005 showed the benefit
+of a positive constraint for Bayesian ICA with their mixture of gaussians
+model. However, they propposed the constrain for $A$ --- leaving $M$
+unconstrained ---, the opposite of what we are doing. Would it be sound to
+remove the squared term of $\lambda$ in the definition of $\tilde{\lambda}$
+(@eq-mixing-model) to support $M \in \mathbb{R}$?
+
 # Where we need help
 
 We need to address a few statistical programming issues as we have not yet
@@ -408,3 +571,5 @@ managed to implement our target model:
 
 * What is the right way to implement the regularised horseshoe prior for this
   case?
+
+* Is there a way of making the orthogonality constraint identifiable?
