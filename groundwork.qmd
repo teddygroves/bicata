@@ -397,7 +397,7 @@ sign consistency, so that a positive relative change in an Imodulon's strength
 in a certain condition will always correspond to up-regulation of genes
 affected by that Imodulon.
 
-## First approach
+## First approach {#sec-first-approach}
 
 We merely expressed @eq-mixing-model in stan this with two matrices $M$ and $A$
 instead of one (mimicking the ICA representation) that, when multiplied, give
@@ -449,7 +449,7 @@ Using partial pooling with shared parameters over the $A$ matrix helped to achie
 
 ## Orthogonality
 
-From the previous ananlysis, we can see that $M$ and $A$ matrices should be further constrained. The charasteristic constrain of ICA is the orthogonality; such that result is that of _Independent Components_.
+From the previous analysis, we can see that $M$ and $A$ matrices should be further constrained. The charasteristic constrain of ICA is the orthogonality; such that result is that of _Independent Components_.
 
 @jauchMonteCarloSimulation2019 proposes a polar expansion (@eq-polar) to achieve this. The authors proposed a PCA generative model using this expansion that we can adapt for our needs in @eq-or-pca.
 
@@ -559,6 +559,115 @@ model. However, they propposed the constrain for $A$ --- leaving $M$
 unconstrained ---, the opposite of what we are doing. Would it be sound to
 remove the squared term of $\lambda$ in the definition of $\tilde{\lambda}$
 (@eq-mixing-model) to support $M \in \mathbb{R}$?
+
+## Design matrices
+
+The @sec-first-approach was refined through the above discussion and compared
+with biological regulon data.
+
+The first simple change was to make $M$ negative instead of $A$ and remove
+the sparsity from $A$. Now, @eq-or-pca becomes
+
+$$
+\begin{align}
+\sigma_A &\sim \text{inverse gamma} \\
+A &\sim N(0, \sigma_A) \\
+z &\sim N(0, 1) \in \mathbb{R}^{N_O, N_M} \\
+\beta &= z * \text{sparse}(M^\ast, \tau, c) \\
+\hat y &= \beta diag(D) A \\
+y &\sim N(\hat y, \nu)
+\end{align}
+$${#eq-posA-rM}
+
+where $N_M$ is the number of modulons and $N_O$ is the number of operons. The latter
+is the second modification to the model.
+
+Before, $M$ was generated as a linear application from Modulons to Genes.
+However, this is wasteful since genes are usually expressed in an operon in
+prokaryotes: adjacent genes in the genome are transcribed into a single mRNA
+that then in translated to the corresponding different proteins. We have this
+information available with some degree of evidence in databases like BioCyc,
+especially for organisms like _Escherichia coli_. Thus, $M$ is now an application
+from Modulons to Operons. With a _gene to operon_ link array `GxO`, $\hat y$ is then expanded
+to the genes in the measurement model
+
+$$
+y \sim N(\hat y[GxO, :], \nu)
+$$
+
+The third modification applies this concept to $A$. In this case, the source
+of the reduction of dimensions is the replicates. The data contains different
+replicate _runs_ that correspond to the same _condition_. Hence, we can generate
+$A \in \mathbb{R}^{m, c}$, where $c$ is the number of conditions and then expand
+it in the measurement model with a _run to condition_ `RxC` link array:
+
+$$
+y \sim N(\hat y[GxO, RxC], \nu)
+$$
+
+$\nu$ was set to the 75 percentile of the standard deviation of genes between replicates, trying to account for of the within-operon
+variance (the position in the operon affects the transcription and the translation levels @limFundamentalRelationshipOperon2011b).
+
+```{python}
+import numpy as np
+from numpy.typing import NDArray
+
+
+def quantiles(x: NDArray) -> tuple[float, float, float]:
+    return np.quantile(x, [0.25, 0.5, 0.75])
+
+
+log_tpm = pd.read_csv("https://github.com/SBRG/precise-db/raw/master/data/log_tpm_norm.csv", index_col=0)
+tidy_tpm = pd.melt(
+    log_tpm.reset_index().rename(columns={"index": "gene"}),
+    var_name="run",
+    value_name="logTPM",
+    id_vars="gene",
+)
+# if two runs are the same in all but the last character (replicate), they are
+# the same condition, used for groupby and then compute stastics
+tidy_tpm["condition"] = tidy_tpm.run.apply(lambda x: x[:-1])
+tidy_tpm = tidy_tpm.groupby(["condition", "gene"]).agg(
+    mean=pd.NamedAgg("logTPM", np.mean),
+    std=pd.NamedAgg("logTPM", lambda x: np.std(x) if len(x) > 1 else 0),
+)
+std = tidy_tpm.loc[tidy_tpm["std"] != 0, "std"].to_numpy()
+quantiles(std)
+```
+
+Apart from the above, the orthogonality constraint was applied to $A$ instead
+of $M$ (now correctly adhering to the original ICA concept).
+
+Furthermore,
+the results of running this prototype were computed using the same protocol as in @sastryEscherichiaColiTranscriptome2019a, where the F1-score is computed between the modulons and the
+reference regulons as a measure of enrichment. This gives a good idea of the biological
+meaning (or lack thereof) of the results. In this case, the membership of the genes is defined
+by the $\kappa$ value in @eq-kappa.
+
+$$
+\begin{align}
+\kappa_m &= \frac{1}{1 + N_C \sigma_A^2 \tau_m^2 M^{\ast 2} \nu} \\
+o &\in m \forall \kappa_{o, m} < 0.5
+\end{align}
+$${#eq-kappa}
+
+where $N_C$ is the number of conditions and then expanding the membership from
+operons to genes with the `GxO` link array. In order to remove divergences and
+hitting max treedepth, it was found important for sampling to reparametrize the
+Student's t distribution as a gamma-fixture representation (see Appendix of
+@piironenSparsityInformationRegularization2017).
+
+In table @tbl-performance, we show the TRN enrichment for the baseline ICA without restarts
+and the thresholds computed by k-means, choosing the number of modulons as the one
+selected by the iModulon protocol (which is the one we use in our method). The performance
+is better for the F1 score but it is able to map less transcription factors to modulons.
+
+| Method       | F1-score 75% | F1-score 50% | F1-score 25% | Matched TFs |
+|:-------------|-------------:|-------------:|-------------:|------------:|
+| ICA Baseline | 0.73         |    0.40      |   0.22       | 60          |
+| This work    | 0.46         |    0.34      |   0.26       | 74          |
+
+: F1-score percentiles for the baseline an our method. {#tbl-performance}
 
 # Where we need help
 

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.3.450">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -113,8 +113,9 @@ div.csl-indent {
   <li><a href="#what-we-would-like-to-achieve" id="toc-what-we-would-like-to-achieve" class="nav-link" data-scroll-target="#what-we-would-like-to-achieve">What we would like to achieve</a></li>
   <li><a href="#measures-of-success" id="toc-measures-of-success" class="nav-link" data-scroll-target="#measures-of-success">Measures of success</a></li>
   <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model">Model</a></li>
-  <li><a href="#first-approach" id="toc-first-approach" class="nav-link" data-scroll-target="#first-approach">First approach</a></li>
+  <li><a href="#sec-first-approach" id="toc-sec-first-approach" class="nav-link" data-scroll-target="#sec-first-approach">First approach</a></li>
   <li><a href="#orthogonality" id="toc-orthogonality" class="nav-link" data-scroll-target="#orthogonality">Orthogonality</a></li>
+  <li><a href="#design-matrices" id="toc-design-matrices" class="nav-link" data-scroll-target="#design-matrices">Design matrices</a></li>
   </ul></li>
   <li><a href="#where-we-need-help" id="toc-where-we-need-help" class="nav-link" data-scroll-target="#where-we-need-help">Where we need help</a></li>
   </ul>
@@ -266,12 +267,12 @@ TPM(g) = \frac{count(g)/size(g)}{\sum_{i\in sample}count(i)/size(i)}
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>  X modulon condition     weight stage next_stage
-1 0       0       S_0 -0.8864822 26_10         NA
-2 1       1       S_0  1.3514882 26_10         NA
-3 2       2       S_0  1.7112368 26_10         NA
-4 3       3       S_0  2.3598187 26_10         NA
-5 4       4       S_0  5.3243216 26_10         NA
-6 5       5       S_0 -0.3278940 26_10         NA</code></pre>
+1 0       0        S0 -0.8864822 26_10         NA
+2 1       1        S0  1.3514882 26_10         NA
+3 2       2        S0  1.7112368 26_10         NA
+4 3       3        S0  2.3598187 26_10         NA
+5 4       4        S0  5.3243216 26_10         NA
+6 5       5        S0 -0.3278940 26_10         NA</code></pre>
 </div>
 </div>
 <p>Let’s prepare the data a bit:</p>
@@ -400,8 +401,8 @@ c_k^2 &amp;\sim \text{inverse gamma}(\alpha, \beta) \\
 \tag{6}\]</span></span></p>
 <p>In <a href="#eq-mixing-model">Equation&nbsp;6</a> <span class="math inline">\(C^+\)</span> and <span class="math inline">\(N^+\)</span> refer respectively to Cauchy and Normal distributions with support only on the positive real line, and the terms <span class="math inline">\(alpha\)</span>, <span class="math inline">\(\beta\)</span> and <span class="math inline">\(tau_{k0}\)</span> are informative priors. Note that the mixing matrix prior is constrained to have support only on the non-negative real line. This is done, following <span class="citation" data-cites="robertsBayesianIndependentComponent2005">Roberts and Choudrey (<a href="#ref-robertsBayesianIndependentComponent2005" role="doc-biblioref">2005</a>)</span>, to ensure sign consistency, so that a positive relative change in an Imodulon’s strength in a certain condition will always correspond to up-regulation of genes affected by that Imodulon.</p>
 </section>
-<section id="first-approach" class="level2">
-<h2 class="anchored" data-anchor-id="first-approach">First approach</h2>
+<section id="sec-first-approach" class="level2">
+<h2 class="anchored" data-anchor-id="sec-first-approach">First approach</h2>
 <p>We merely expressed <a href="#eq-mixing-model">Equation&nbsp;6</a> in stan this with two matrices <span class="math inline">\(M\)</span> and <span class="math inline">\(A\)</span> instead of one (mimicking the ICA representation) that, when multiplied, give rise to <span class="math inline">\(\hat y\)</span>.</p>
 <p>This worked for simulated data to some extent. For real data, using the <a href="https://github.com/SBRG/precise-db">precise-db</a>, we faced the following issues:</p>
 <ol type="1">
@@ -457,7 +458,7 @@ c_k^2 &amp;\sim \text{inverse gamma}(\alpha, \beta) \\
 </section>
 <section id="orthogonality" class="level2">
 <h2 class="anchored" data-anchor-id="orthogonality">Orthogonality</h2>
-<p>From the previous ananlysis, we can see that <span class="math inline">\(M\)</span> and <span class="math inline">\(A\)</span> matrices should be further constrained. The charasteristic constrain of ICA is the orthogonality; such that result is that of <em>Independent Components</em>.</p>
+<p>From the previous analysis, we can see that <span class="math inline">\(M\)</span> and <span class="math inline">\(A\)</span> matrices should be further constrained. The charasteristic constrain of ICA is the orthogonality; such that result is that of <em>Independent Components</em>.</p>
 <p><span class="citation" data-cites="jauchMonteCarloSimulation2019">Jauch, Hoff, and Dunson (<a href="#ref-jauchMonteCarloSimulation2019" role="doc-biblioref">2019</a>)</span> proposes a polar expansion (<a href="#eq-polar">Equation&nbsp;7</a>) to achieve this. The authors proposed a PCA generative model using this expansion that we can adapt for our needs in <a href="#eq-or-pca">Equation&nbsp;8</a>.</p>
 <p><span id="eq-polar"><span class="math display">\[
 \begin{align}
@@ -544,7 +545,7 @@ X^p_{m} &amp;= \frac{1}{\sqrt{\lambda(X)_m}}
 <span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;ggplot: (8737829084124)&gt;</code></pre>
+<pre><code>&lt;Figure Size: (2000 x 4000)&gt;</code></pre>
 </div>
 <div class="cell-output-display">
 <div id="fig-or-ica-90" class="quarto-figure quarto-figure-center anchored">
@@ -557,6 +558,129 @@ X^p_{m} &amp;= \frac{1}{\sqrt{\lambda(X)_m}}
 </div>
 <p>However, altough faster to sample, the chains are still hitting the max tree depth. In the case of orthogonality, the <span class="math inline">\(M\)</span> matrix is not identifiable since there is a rotational invariance in the polar expansion. This is a problem for reporting such modulons. Another issue that becomes evident when looking at <a href="#fig-or-ica-90">Figure&nbsp;5</a> is that the positive-constraint on <span class="math inline">\(M\)</span> makes the modulons interpretation less straightforward in a biological sense, where we expect that a regulatory mode may increase the expression of some genes and decrease the expression of some other genes.</p>
 <p>As aforementioned, <span class="citation" data-cites="robertsBayesianIndependentComponent2005">Roberts and Choudrey (<a href="#ref-robertsBayesianIndependentComponent2005" role="doc-biblioref">2005</a>)</span> showed the benefit of a positive constraint for Bayesian ICA with their mixture of gaussians model. However, they propposed the constrain for <span class="math inline">\(A\)</span> — leaving <span class="math inline">\(M\)</span> unconstrained —, the opposite of what we are doing. Would it be sound to remove the squared term of <span class="math inline">\(\lambda\)</span> in the definition of <span class="math inline">\(\tilde{\lambda}\)</span> (<a href="#eq-mixing-model">Equation&nbsp;6</a>) to support <span class="math inline">\(M \in \mathbb{R}\)</span>?</p>
+</section>
+<section id="design-matrices" class="level2">
+<h2 class="anchored" data-anchor-id="design-matrices">Design matrices</h2>
+<p>The <a href="#sec-first-approach">Section&nbsp;2.5</a> was refined through the above discussion and compared with biological regulon data.</p>
+<p>The first simple change was to make <span class="math inline">\(M\)</span> negative instead of <span class="math inline">\(A\)</span> and remove the sparsity from <span class="math inline">\(A\)</span>. Now, <a href="#eq-or-pca">Equation&nbsp;8</a> becomes</p>
+<p><span id="eq-posA-rM"><span class="math display">\[
+\begin{align}
+\sigma_A &amp;\sim \text{inverse gamma} \\
+A &amp;\sim N(0, \sigma_A) \\
+z &amp;\sim N(0, 1) \in \mathbb{R}^{N_O, N_M} \\
+\beta &amp;= z * \text{sparse}(M^\ast, \tau, c) \\
+\hat y &amp;= \beta diag(D) A \\
+y &amp;\sim N(\hat y, \nu)
+\end{align}
+\tag{10}\]</span></span></p>
+<p>where <span class="math inline">\(N_M\)</span> is the number of modulons and <span class="math inline">\(N_O\)</span> is the number of operons. The latter is the second modification to the model.</p>
+<p>Before, <span class="math inline">\(M\)</span> was generated as a linear application from Modulons to Genes. However, this is wasteful since genes are usually expressed in an operon in prokaryotes: adjacent genes in the genome are transcribed into a single mRNA that then in translated to the corresponding different proteins. We have this information available with some degree of evidence in databases like BioCyc, especially for organisms like <em>Escherichia coli</em>. Thus, <span class="math inline">\(M\)</span> is now an application from Modulons to Operons. With a <em>gene to operon</em> link array <code>GxO</code>, <span class="math inline">\(\hat y\)</span> is then expanded to the genes in the measurement model</p>
+<p><span class="math display">\[
+y \sim N(\hat y[GxO, :], \nu)
+\]</span></p>
+<p>The third modification applies this concept to <span class="math inline">\(A\)</span>. In this case, the source of the reduction of dimensions is the replicates. The data contains different replicate <em>runs</em> that correspond to the same <em>condition</em>. Hence, we can generate <span class="math inline">\(A \in \mathbb{R}^{m, c}\)</span>, where <span class="math inline">\(c\)</span> is the number of conditions and then expand it in the measurement model with a <em>run to condition</em> <code>RxC</code> link array:</p>
+<p><span class="math display">\[
+y \sim N(\hat y[GxO, RxC], \nu)
+\]</span></p>
+<p><span class="math inline">\(\nu\)</span> was set to the 75 percentile of the standard deviation of genes between replicates, trying to account for of the within-operon variance (the position in the operon affects the transcription and the translation levels <span class="citation" data-cites="limFundamentalRelationshipOperon2011b">Lim, Lee, and Hussein (<a href="#ref-limFundamentalRelationshipOperon2011b" role="doc-biblioref">2011</a>)</span>).</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpy.typing <span class="im">import</span> NDArray</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quantiles(x: NDArray) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.quantile(x, [<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>])</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>log_tpm <span class="op">=</span> pd.read_csv(<span class="st">"https://github.com/SBRG/precise-db/raw/master/data/log_tpm_norm.csv"</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>tidy_tpm <span class="op">=</span> pd.melt(</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    log_tpm.reset_index().rename(columns<span class="op">=</span>{<span class="st">"index"</span>: <span class="st">"gene"</span>}),</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    var_name<span class="op">=</span><span class="st">"run"</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    value_name<span class="op">=</span><span class="st">"logTPM"</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    id_vars<span class="op">=</span><span class="st">"gene"</span>,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co"># if two runs are the same in all but the last character (replicate), they are</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co"># the same condition, used for groupby and then compute stastics</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>tidy_tpm[<span class="st">"condition"</span>] <span class="op">=</span> tidy_tpm.run.<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[:<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>tidy_tpm <span class="op">=</span> tidy_tpm.groupby([<span class="st">"condition"</span>, <span class="st">"gene"</span>]).agg(</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    mean<span class="op">=</span>pd.NamedAgg(<span class="st">"logTPM"</span>, np.mean),</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    std<span class="op">=</span>pd.NamedAgg(<span class="st">"logTPM"</span>, <span class="kw">lambda</span> x: np.std(x) <span class="cf">if</span> <span class="bu">len</span>(x) <span class="op">&gt;</span> <span class="dv">1</span> <span class="cf">else</span> <span class="dv">0</span>),</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>std <span class="op">=</span> tidy_tpm.loc[tidy_tpm[<span class="st">"std"</span>] <span class="op">!=</span> <span class="dv">0</span>, <span class="st">"std"</span>].to_numpy()</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>quantiles(std)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>array([0.03172568, 0.0752783 , 0.16098884])</code></pre>
+</div>
+</div>
+<p>Apart from the above, the orthogonality constraint was applied to <span class="math inline">\(A\)</span> instead of <span class="math inline">\(M\)</span> (now correctly adhering to the original ICA concept).</p>
+<p>Furthermore, the results of running this prototype were computed using the same protocol as in <span class="citation" data-cites="sastryEscherichiaColiTranscriptome2019a">Sastry et al. (<a href="#ref-sastryEscherichiaColiTranscriptome2019a" role="doc-biblioref">2019</a>)</span>, where the F1-score is computed between the modulons and the reference regulons as a measure of enrichment. This gives a good idea of the biological meaning (or lack thereof) of the results. In this case, the membership of the genes is defined by the <span class="math inline">\(\kappa\)</span> value in <a href="#eq-kappa">Equation&nbsp;11</a>.</p>
+<p><span id="eq-kappa"><span class="math display">\[
+\begin{align}
+\kappa_m &amp;= \frac{1}{1 + N_C \sigma_A^2 \tau_m^2 M^{\ast 2} \nu} \\
+o &amp;\in m \forall \kappa_{o, m} &lt; 0.5
+\end{align}
+\tag{11}\]</span></span></p>
+<p>where <span class="math inline">\(N_C\)</span> is the number of conditions and then expanding the membership from operons to genes with the <code>GxO</code> link array. In order to remove divergences and hitting max treedepth, it was found important for sampling to reparametrize the Student’s t distribution as a gamma-fixture representation (see Appendix of <span class="citation" data-cites="piironenSparsityInformationRegularization2017">Piironen and Vehtari (<a href="#ref-piironenSparsityInformationRegularization2017" role="doc-biblioref">2017</a>)</span>).</p>
+<p>In table <a href="#tbl-performance">Table&nbsp;1</a>, we show the TRN enrichment for the baseline ICA without restarts and the thresholds computed by k-means, choosing the number of modulons as the one selected by the iModulon protocol (which is the one we use in our method). The performance is better for the F1 score but it is able to map less transcription factors to modulons.</p>
+<div id="tbl-performance" class="anchored">
+<table class="table">
+<caption>Table&nbsp;1: F1-score percentiles for the baseline an our method.</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">F1-score 75%</th>
+<th style="text-align: right;">F1-score 50%</th>
+<th style="text-align: right;">F1-score 25%</th>
+<th style="text-align: right;">Matched TFs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ICA Baseline</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">This work</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">0.34</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">74</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- 
+## About the global scale
+
+As implied above, there is a different $\tau$ inferred for each modulon. The global scale $\tau_0$
+for each $\tau$ is calculated as:
+
+$$
+\tau = p_0 ./ ((N_O - p_0) * \sqrt(N_C));
+$$
+
+$\sigma$ is multiplied by the $\tau_0$ in the model to get the prior for $\tau$.
+
+## Whitening
+
+One of the key parts of classical ICA is the whitening of the data. Here,
+_whitening_ refers to the transformation of the data to a space where the
+covariance matrix is the identity matrix. To see the effect of whitening in our
+implementation, the model was run on the same data with and without whitening. 
+-->
 </section>
 </section>
 <section id="where-we-need-help" class="level1">
@@ -578,8 +702,17 @@ Hyvärinen, A., and E. Oja. 2000. <span>“Independent Component Analysis: Algor
 <div id="ref-jauchMonteCarloSimulation2019" class="csl-entry" role="listitem">
 Jauch, Michael, Peter D. Hoff, and David B. Dunson. 2019. <span>“Monte <span>Carlo</span> Simulation on the <span>Stiefel</span> Manifold via Polar Expansion,”</span> no. arXiv:1906.07684 (June). <a href="https://doi.org/10.48550/arXiv.1906.07684">https://doi.org/10.48550/arXiv.1906.07684</a>.
 </div>
+<div id="ref-limFundamentalRelationshipOperon2011b" class="csl-entry" role="listitem">
+Lim, Han N., Yeong Lee, and Razika Hussein. 2011. <span>“Fundamental Relationship Between Operon Organization and Gene Expression.”</span> <em>Proc Natl Acad Sci U S A</em> 108 (26): 10626–31. <a href="https://doi.org/10.1073/pnas.1105692108">https://doi.org/10.1073/pnas.1105692108</a>.
+</div>
+<div id="ref-piironenSparsityInformationRegularization2017" class="csl-entry" role="listitem">
+Piironen, Juho, and Aki Vehtari. 2017. <span>“Sparsity Information and Regularization in the Horseshoe and Other Shrinkage Priors.”</span> <em>Electronic Journal of Statistics</em> 11 (2). <a href="https://doi.org/10.1214/17-EJS1337SI">https://doi.org/10.1214/17-EJS1337SI</a>.
+</div>
 <div id="ref-robertsBayesianIndependentComponent2005" class="csl-entry" role="listitem">
 Roberts, Stephen, and Rizwan Choudrey. 2005. <span>“Bayesian <span>Independent Component Analysis</span> with <span>Prior Constraints</span>: <span>An Application</span> in <span>Biosignal Analysis</span>.”</span> In <em>Deterministic and <span>Statistical Methods</span> in <span>Machine Learning</span></em>, edited by Joab Winkler, Mahesan Niranjan, and Neil Lawrence, 159–79. Lecture <span>Notes</span> in <span>Computer Science</span>. <span>Berlin, Heidelberg</span>: <span>Springer</span>. <a href="https://doi.org/10.1007/11559887_10">https://doi.org/10.1007/11559887_10</a>.
+</div>
+<div id="ref-sastryEscherichiaColiTranscriptome2019a" class="csl-entry" role="listitem">
+Sastry, Anand V., Ye Gao, Richard Szubin, Ying Hefner, Sibei Xu, Donghyuk Kim, Kumari Sonal Choudhary, Laurence Yang, Zachary A. King, and Bernhard O. Palsson. 2019. <span>“The <span>Escherichia</span> Coli Transcriptome Mostly Consists of Independently Regulated Modules.”</span> <em>Nat Commun</em> 10 (1): 5536. <a href="https://doi.org/10.1038/s41467-019-13483-w">https://doi.org/10.1038/s41467-019-13483-w</a>.
 </div>
 <div id="ref-tanIndependentComponentAnalysis2020" class="csl-entry" role="listitem">
 Tan, Justin, Anand V. Sastry, Karoline S. Fremming, Sara P. Bjørn, Alexandra Hoffmeyer, Sangwoo Seo, Bjørn G. Voldborg, and Bernhard O. Palsson. 2020. <span>“Independent Component Analysis of <span>E</span>. Coli’s Transcriptome Reveals the Cellular Processes That Respond to Heterologous Gene Expression.”</span> <em>Metabolic Engineering</em> 61 (September): 360–68. <a href="https://doi.org/10.1016/j.ymben.2020.07.002">https://doi.org/10.1016/j.ymben.2020.07.002</a>.
