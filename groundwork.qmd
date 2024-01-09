@@ -669,6 +669,27 @@ is better for the F1 score but it is able to map less transcription factors to m
 
 : F1-score percentiles for the baseline an our method. {#tbl-performance}
 
+## About the global scale
+
+As implied above, there is a different $\tau$ inferred for each modulon. The global scale $\tau_0$
+for each $\tau$ is calculated as:
+
+$$
+\tau = \frac{p_0} {(N_O - p_0) \sqrt {N_C}}
+$$
+
+$\sigma$ is multiplied by the $\tau_0$ in the model to get the prior for $\tau$.
+
+## Whitening
+
+One of the key parts of classical ICA is the whitening of the data. Here,
+_whitening_ refers to the transformation of the data to a space where the
+covariance matrix is the identity matrix. To see the effect of whitening in our
+implementation, the model was run on the same data with and without whitening.
+
+Whitening data seems be fundamental in avoiding divergences, even when the
+reparametrizations of the Student's t were applied.
+
 # Where we need help
 
 We need to address a few statistical programming issues as we have not yet

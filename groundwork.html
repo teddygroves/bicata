@@ -116,6 +116,8 @@ div.csl-indent {
   <li><a href="#sec-first-approach" id="toc-sec-first-approach" class="nav-link" data-scroll-target="#sec-first-approach">First approach</a></li>
   <li><a href="#orthogonality" id="toc-orthogonality" class="nav-link" data-scroll-target="#orthogonality">Orthogonality</a></li>
   <li><a href="#design-matrices" id="toc-design-matrices" class="nav-link" data-scroll-target="#design-matrices">Design matrices</a></li>
+  <li><a href="#about-the-global-scale" id="toc-about-the-global-scale" class="nav-link" data-scroll-target="#about-the-global-scale">About the global scale</a></li>
+  <li><a href="#whitening" id="toc-whitening" class="nav-link" data-scroll-target="#whitening">Whitening</a></li>
   </ul></li>
   <li><a href="#where-we-need-help" id="toc-where-we-need-help" class="nav-link" data-scroll-target="#where-we-need-help">Where we need help</a></li>
   </ul>
@@ -662,25 +664,19 @@ o &amp;\in m \forall \kappa_{o, m} &lt; 0.5
 </tbody>
 </table>
 </div>
-<!-- 
-## About the global scale
-
-As implied above, there is a different $\tau$ inferred for each modulon. The global scale $\tau_0$
-for each $\tau$ is calculated as:
-
-$$
-\tau = p_0 ./ ((N_O - p_0) * \sqrt(N_C));
-$$
-
-$\sigma$ is multiplied by the $\tau_0$ in the model to get the prior for $\tau$.
-
-## Whitening
-
-One of the key parts of classical ICA is the whitening of the data. Here,
-_whitening_ refers to the transformation of the data to a space where the
-covariance matrix is the identity matrix. To see the effect of whitening in our
-implementation, the model was run on the same data with and without whitening. 
--->
+</section>
+<section id="about-the-global-scale" class="level2">
+<h2 class="anchored" data-anchor-id="about-the-global-scale">About the global scale</h2>
+<p>As implied above, there is a different <span class="math inline">\(\tau\)</span> inferred for each modulon. The global scale <span class="math inline">\(\tau_0\)</span> for each <span class="math inline">\(\tau\)</span> is calculated as:</p>
+<p><span class="math display">\[
+\tau = \frac{p_0} {(N_O - p_0) \sqrt {N_C}}
+\]</span></p>
+<p><span class="math inline">\(\sigma\)</span> is multiplied by the <span class="math inline">\(\tau_0\)</span> in the model to get the prior for <span class="math inline">\(\tau\)</span>.</p>
+</section>
+<section id="whitening" class="level2">
+<h2 class="anchored" data-anchor-id="whitening">Whitening</h2>
+<p>One of the key parts of classical ICA is the whitening of the data. Here, <em>whitening</em> refers to the transformation of the data to a space where the covariance matrix is the identity matrix. To see the effect of whitening in our implementation, the model was run on the same data with and without whitening.</p>
+<p>Whitening data seems be fundamental in avoiding divergences, even when the reparametrizations of the Student’s t were applied.</p>
 </section>
 </section>
 <section id="where-we-need-help" class="level1">
