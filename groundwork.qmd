@@ -585,7 +585,7 @@ is the second modification to the model.
 Before, $M$ was generated as a linear application from Modulons to Genes.
 However, this is wasteful since genes are usually expressed in an operon in
 prokaryotes: adjacent genes in the genome are transcribed into a single mRNA
-that then in translated to the corresponding different proteins. We have this
+that then is translated to the corresponding different proteins. We have this
 information available with some degree of evidence in databases like BioCyc,
 especially for organisms like _Escherichia coli_. Thus, $M$ is now an application
 from Modulons to Operons. With a _gene to operon_ link array `GxO`, $\hat y$ is then expanded
@@ -657,15 +657,16 @@ hitting max treedepth, it was found important for sampling to reparametrize the
 Student's t distribution as a gamma-fixture representation (see Appendix of
 @piironenSparsityInformationRegularization2017).
 
-In table @tbl-performance, we show the TRN enrichment for the baseline ICA without restarts
-and the thresholds computed by k-means, choosing the number of modulons as the one
-selected by the iModulon protocol (which is the one we use in our method). The performance
-is better for the F1 score but it is able to map less transcription factors to modulons.
+In table @tbl-performance, we show the TRN enrichment for the baseline ICA
+without restarts and the thresholds computed by k-means, choosing the number
+of modulons as the one selected by the iModulon protocol (which is the one we
+use in our method). The baseline performance is better for the 75 percentile
+F1-score but it is able to map less transcription factors to modulons.
 
 | Method       | F1-score 75% | F1-score 50% | F1-score 25% | Matched TFs |
 |:-------------|-------------:|-------------:|-------------:|------------:|
 | ICA Baseline | 0.73         |    0.40      |   0.22       | 60          |
-| This work    | 0.46         |    0.34      |   0.26       | 74          |
+| This work    | 0.62         |    0.51      |   0.42       | 68          |
 
 : F1-score percentiles for the baseline an our method. {#tbl-performance}
 
@@ -675,7 +676,7 @@ As implied above, there is a different $\tau$ inferred for each modulon. The glo
 for each $\tau$ is calculated as:
 
 $$
-\tau = \frac{p_0} {(N_O - p_0) \sqrt {N_C}}
+\tau_0 = \frac{p_0} {(N_O - p_0) \sqrt {N_C}}
 $$
 
 $\sigma$ is multiplied by the $\tau_0$ in the model to get the prior for $\tau$.
