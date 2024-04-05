@@ -580,6 +580,14 @@ y &amp;\sim N(\hat y, \nu)
 <p><span class="math display">\[
 y \sim N(\hat y[GxO, :], \nu)
 \]</span></p>
+<p>This assumes that the mean expression within an operon is the same over the gens. We can propose a different model that allows different mean expression, while maintaining the <span class="math inline">\(M\)</span> operon-based dimensions: <span id="eq-posA-zaft-rm"><span class="math display">\[
+\begin{align}
+z &amp;\sim N(0, 1) \in \mathbb{R}^{\mathbf{N_G}, N_M} \\
+\beta &amp;= \text{sparse}(M^\ast, \tau, c)[GxO, :] * z \\
+\hat y &amp;= \beta A \\
+y \sim N(\hat y[GxO, :], \nu)
+\end{align}
+\tag{11}\]</span></span></p>
 <p>The third modification applies this concept to <span class="math inline">\(A\)</span>. In this case, the source of the reduction of dimensions is the replicates. The data contains different replicate <em>runs</em> that correspond to the same <em>condition</em>. Hence, we can generate <span class="math inline">\(A \in \mathbb{R}^{m, c}\)</span>, where <span class="math inline">\(c\)</span> is the number of conditions and then expand it in the measurement model with a <em>run to condition</em> <code>RxC</code> link array:</p>
 <p><span class="math display">\[
 y \sim N(\hat y[GxO, RxC], \nu)
@@ -618,24 +626,24 @@ y \sim N(\hat y[GxO, RxC], \nu)
 </div>
 </div>
 <p>Apart from the above, the orthogonality constraint was applied to <span class="math inline">\(A\)</span> instead of <span class="math inline">\(M\)</span> (now correctly adhering to the original ICA concept).</p>
-<p>Furthermore, the results of running this prototype were computed using the same protocol as in <span class="citation" data-cites="sastryEscherichiaColiTranscriptome2019a">Sastry et al. (<a href="#ref-sastryEscherichiaColiTranscriptome2019a" role="doc-biblioref">2019</a>)</span>, where the F1-score is computed between the modulons and the reference regulons as a measure of enrichment. This gives a good idea of the biological meaning (or lack thereof) of the results. In this case, the membership of the genes is defined by the <span class="math inline">\(\kappa\)</span> value in <a href="#eq-kappa">Equation&nbsp;11</a>.</p>
+<p>Furthermore, the results of running this prototype were computed using the same protocol as in <span class="citation" data-cites="sastryEscherichiaColiTranscriptome2019a">Sastry et al. (<a href="#ref-sastryEscherichiaColiTranscriptome2019a" role="doc-biblioref">2019</a>)</span>, where the F1-score is computed between the modulons and the reference regulons as a measure of enrichment. This gives a good idea of the biological meaning (or lack thereof) of the results. In this case, the membership of the genes is defined by the <span class="math inline">\(\kappa\)</span> value in <a href="#eq-kappa">Equation&nbsp;12</a>.</p>
 <p><span id="eq-kappa"><span class="math display">\[
 \begin{align}
 \kappa_m &amp;= \frac{1}{1 + N_C \sigma_A^2 \tau_m^2 M^{\ast 2} \nu} \\
 o &amp;\in m \forall \kappa_{o, m} &lt; 0.5
 \end{align}
-\tag{11}\]</span></span></p>
+\tag{12}\]</span></span></p>
 <p>where <span class="math inline">\(N_C\)</span> is the number of conditions and then expanding the membership from operons to genes with the <code>GxO</code> link array. In order to remove divergences and hitting max treedepth, it was found important for sampling to reparametrize the Student’s t distribution as a gamma-fixture representation (see Appendix of <span class="citation" data-cites="piironenSparsityInformationRegularization2017">Piironen and Vehtari (<a href="#ref-piironenSparsityInformationRegularization2017" role="doc-biblioref">2017</a>)</span>).</p>
-<p>In table <a href="#tbl-performance">Table&nbsp;1</a>, we show the TRN enrichment for the baseline ICA without restarts and the thresholds computed by k-means, choosing the number of modulons as the one selected by the iModulon protocol (which is the one we use in our method). The baseline performance is better for the 75 percentile F1-score but it is able to map less transcription factors to modulons.</p>
+<p>In table <a href="#tbl-performance">Table&nbsp;1</a>, we show the TRN enrichment for the baseline ICA without restarts and the thresholds computed by k-means, choosing the number of modulons as the one selected by the iModulon protocol (which is the one we use in our method). The baseline performance is better for the 75 percentile F1-score but it is able to map less transcription factors to modulons with respect to <a href="#eq-posA-rM">Equation&nbsp;10</a>. The second model in <a href="#eq-posA-zaft-rm">Equation&nbsp;11</a> performs slightly better than the baseline and matches more transcription factors.</p>
 <div id="tbl-performance" class="anchored">
 <table class="table">
-<caption>Table&nbsp;1: F1-score percentiles for the baseline an our method.</caption>
+<caption>Table&nbsp;1: F1-score percentiles for the baseline and our method(s).</caption>
 <colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 18%">
+<col style="width: 24%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 17%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -650,16 +658,23 @@ o &amp;\in m \forall \kappa_{o, m} &lt; 0.5
 <tr class="odd">
 <td style="text-align: left;">ICA Baseline</td>
 <td style="text-align: right;">0.73</td>
-<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">0.50</td>
 <td style="text-align: right;">0.22</td>
 <td style="text-align: right;">60</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">This work</td>
+<td style="text-align: left;"><a href="#eq-posA-rM">Equation&nbsp;10</a></td>
 <td style="text-align: right;">0.62</td>
 <td style="text-align: right;">0.51</td>
 <td style="text-align: right;">0.42</td>
 <td style="text-align: right;">68</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="#eq-posA-zaft-rm">Equation&nbsp;11</a></td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">70</td>
 </tr>
 </tbody>
 </table>

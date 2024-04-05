@@ -595,6 +595,18 @@ $$
 y \sim N(\hat y[GxO, :], \nu)
 $$
 
+This assumes that the mean expression within an operon is the same over the
+gens. We can propose a different model that allows different mean expression,
+while maintaining the $M$ operon-based dimensions:
+$$
+\begin{align}
+z &\sim N(0, 1) \in \mathbb{R}^{\mathbf{N_G}, N_M} \\
+\beta &= \text{sparse}(M^\ast, \tau, c)[GxO, :] * z \\
+\hat y &= \beta A \\
+y \sim N(\hat y[GxO, :], \nu)
+\end{align}
+$$ {#eq-posA-zaft-rm}
+
 The third modification applies this concept to $A$. In this case, the source
 of the reduction of dimensions is the replicates. The data contains different
 replicate _runs_ that correspond to the same _condition_. Hence, we can generate
@@ -661,14 +673,17 @@ In table @tbl-performance, we show the TRN enrichment for the baseline ICA
 without restarts and the thresholds computed by k-means, choosing the number
 of modulons as the one selected by the iModulon protocol (which is the one we
 use in our method). The baseline performance is better for the 75 percentile
-F1-score but it is able to map less transcription factors to modulons.
+F1-score but it is able to map less transcription factors to modulons with
+respect to @eq-posA-rM. The second model in @eq-posA-zaft-rm performs slightly
+better than the baseline and matches more transcription factors.
 
-| Method       | F1-score 75% | F1-score 50% | F1-score 25% | Matched TFs |
-|:-------------|-------------:|-------------:|-------------:|------------:|
-| ICA Baseline | 0.73         |    0.40      |   0.22       | 60          |
-| This work    | 0.62         |    0.51      |   0.42       | 68          |
+| Method           | F1-score 75% | F1-score 50% | F1-score 25% | Matched TFs |
+|:-----------------|-------------:|-------------:|-------------:|------------:|
+| ICA Baseline     | 0.73         |    0.50      |   0.22       | 60          |
+| @eq-posA-rM      | 0.62         |    0.51      |   0.42       | 68          |
+| @eq-posA-zaft-rm | 0.74         |    0.55      |   0.44       | 70          |
 
-: F1-score percentiles for the baseline an our method. {#tbl-performance}
+: F1-score percentiles for the baseline and our method(s). {#tbl-performance}
 
 ## About the global scale
 
