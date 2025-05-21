@@ -5,12 +5,17 @@ statistical models to describe transcriptome data.
 
 ## Reproducibility
 
-Python 3.9 and pip (or [uv](https://docs.astral.sh/uv/)) are required.
+[Stan](https://mc-stan.org/), python 3.9 and pip (or [uv](https://docs.astral.sh/uv/)) are required.
 
 ```bash
 pip install .
 # or uv sync
 ```
+
+
+> [!IMPORTANT]  
+> `cmdstanpy` is listed as a dev dependency but it is required to run the scripts!
+> Check [the Stan documentation](https://mc-stan.org/install/index.html) to check how to install it for your platform.
 
 The scripts are to be run from the [`scripts`](./scripts) directory:
 
